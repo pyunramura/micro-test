@@ -1,0 +1,54 @@
+---
+version: '3.8'
+services:
+  traefik:
+  # Docs: https://doc.traefik.io/traefik
+    image: traefik
+    container_name: traefik
+    command:
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.file=true
+      - --providers.file.filename=/dynamic.yml
+      - --entryPoints.web.address=:80
+      - --entryPoints.web.http.redirections.entryPoint.to=websecure
+      - --entryPoints.web.http.redirections.entryPoint.scheme=https
+      - --entryPoints.web.http.redirections.entryPoint.permanent=true
+      - --entryPoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls=true
+      - --entrypoints.websecure.http.tls.certresolver=le
+      - --certificatesresolvers.le.acme.email=youremail@yoursite.com
+      - --certificatesresolvers.le.acme.httpschallenge=true
+      - --certificatesresolvers.le.acme.storage=/acme.json
+    networks:
+      - traefik-public
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./dynamic-config.yml:/dynamic.yml
+      - ./acme.json:/acme.json
+      - ./.htpasswd:/.htpasswd
+    labels:
+      - traefik.http.routers.traefik.rule=Host(`traefik.yoursite.com`)
+      - traefik.http.routers.traefik.service=api@internal
+      - traefik.http.routers.traefik.middlewares=user-auth
+      - traefik.http.middlewares.user-auth.basicauth.usersfile=/.htpasswd
+  microw:
+  # Docs: https://github.com/pyunramura/microw
+    image: ghcr.io/pyunramura/microw:latest
+    container_name: microw
+    restart: unless-stopped
+    volumes:
+      - ./dynamic-config.yml:/dynamic.yml
+    networks:
+      - traefik-public
+    depends_on:
+      - traefik
+    labels:
+      - traefik.routers.microw.rule=Host(`traefik-config.yoursite.com`)
+      - traefik.http.routers.traefik.service=microw
+      - traefik.http.routers.traefik.middlewares=user-auth
+networks:
+  traefik-public:
