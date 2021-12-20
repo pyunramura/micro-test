@@ -23,9 +23,9 @@ RUN [ ! -z ${TARGETPLATFORM+x} ] && \
     wget -q -O - "https://github.com/zyedidia/micro/releases/download/v$micro/micro-$micro-linux${platform:-64-static}.tar.gz" | \
     tar xz --strip-components 1 micro-$micro/micro -C /app && \
     chown root:root /app/micro && \
-    for plug in ${plugin}; do \
+    for plug in ${micro-plugin-list}; do \
         /app/micro -plugin install $plug; \
-        done; \
+        done && \
     /app/micro -plugin update
 
 COPY config config/
