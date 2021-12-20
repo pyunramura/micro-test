@@ -5,7 +5,7 @@ name: Dockerfile Update
 on:
   workflow_dispatch:
   schedule:
-    - cron:  '45 2 * * *'
+    - cron: '45 2 * * *'
 # push:
 #   branches: [main]
 #   paths:
