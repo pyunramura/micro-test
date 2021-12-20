@@ -5,7 +5,8 @@ name: Validate Yaml
 on:
   pull_request:
     paths:
-      - '.github/**'
+      - '**/*.yml'
+      - '**/*.yaml'
 # push:
 #   branches: [ main ]
 #   paths:
