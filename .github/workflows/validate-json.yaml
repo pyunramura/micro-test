@@ -3,14 +3,14 @@ name: Validate JSON
 # From: https://github.com/OrRosenblatt/validate-json-action
 
 on:
-  workflow_dispatch:    
+  workflow_dispatch:
   pull_request:
     paths:
       - '**/*.json'
-  # push:
-  #   branches: [ main ]
-  #   paths:
-  #     - 'config/**/*.json'
+# push:
+#   branches: [ main ]
+#   paths:
+#     - 'config/**/*.json'
 
 jobs:
   validate:
