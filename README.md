@@ -11,18 +11,18 @@ Find this image on the Github container registry at [pyunramura/microw](https://
 or in the Dockerhub registry at [ghcr.io/pyunramura/microw](https://hub.docker.com/r/pyunramura/microw).
 
 ### About the project
-This image is built on top of the amazing __[Micro](https://github.com/zyedidia/micro)__ and __[ttyd](https://github.com/tsl0922/ttyd)__ projects.
+This image is builds on top of the amazing __[Micro](https://github.com/zyedidia/micro)__ and __[ttyd](https://github.com/tsl0922/ttyd)__ projects.
 
 The project has one simple aim; to provide a containerized webgui for editing text files of various types.
 
 ## Background
-I was searching for a simple and lightweight way to edit my traefik dynamic configuration without the need to ssh into the underlying server. Though I already knew of full IDEs like code-server and cloud9, for my use case they were just too heavy and feature-rich for editing a few yaml or toml files. After I stumbled on the ttyd project I realized that it would be possible to put together a minimal docker image that would fulfill this task.
+I was searching for a simple and lightweight way to edit my traefik dynamic configuration without the need to ssh into the underlying server. Though I already knew of full IDEs like code-server and cloud9, for my use case they were too heavy and feature-rich for editing a couple of yaml or toml files. After I stumbled on the ttyd project I realized that it would be possible to put together a minimal docker image that would fulfill this task.
 
 ## Features
 - Minimal - No extra cruft. Only what you need to edit config files, text files, or even code if you're so inclined.
 - Tiny - the image is less than 8Mb in size. Perfect as a sidecar image.
 - Few dependencies - Just [tini](https://github.com/krallin/tini), [ttyd](https://github.com/tsl0922/ttyd), and [micro](https://github.com/zyedidia/micro) on [alpine linux](https://www.alpinelinux.org/). And thanks to the convenience of github-actions it's always up to date!
-- Versatile - With the powerful [Micro](https://micro-editor.github.io/) editor built in, it's easy to modify code in a lightweight ncui with many of the creature comforts of a full IDE.
+- Versatile - With the powerful [Micro](https://micro-editor.github.io/) editor built in, it's easy to write code in a lightweight ncui with many of the creature comforts of a full IDE.
 - Cross-compatible - Images for x86, x86_64, arm64/aarch64, and armhf/v7 are available.
 
 ## How to use it
@@ -32,7 +32,7 @@ docker run --rm -p 7681:7681 --name microw ghcr.io/pyunramura/microw
 or
 docker run --rm -p 7681:7681 --name microw pyunramura/microw
 ```
-Here the container will be mapped to port 7681 on the host and 7681 inside the container.
+Here the container is mapped to port 7681 on the host and 7681 inside the container.
 
 Then access the newly created Micro buffer at http://localhost:7681/
 
@@ -58,7 +58,7 @@ Now you can persist any changes you prefer in to micro's configuration settings,
 ```
 docker run -p 7681:7681 --name microw ghcr.io/pyunramura/microw ttyd -s 3 --url-arg -t titleFixed=Microw -t rendererType=webgl /app/micro
 ```
-Here all of the commands after `ghcr.io/pyunramura/microw` are passed to the tini init system, so if you'd prefer to log into the shell instead you could run `... ghcr.io/pyunramura/microw ttyd -s 3 ... /sbin/login`
+Here the commands after `ghcr.io/pyunramura/microw` get passed to the tini init system, so if you'd prefer to log into the shell instead you could run `... ghcr.io/pyunramura/microw ttyd -s 3 ... /sbin/login`
 
 ***Note:*** More examples of **ttyd's** configuration options [are available here](https://github.com/tsl0922/ttyd#command-line-options).
 
@@ -120,7 +120,7 @@ services:
 networks:
   traefik-public:
 ```
-Here we've set up both traefik and microw in a configuration so that Traefik will provide an https endpoint and authentication to microw's web interface, and microw will then be able to modify traefik's dynamic config file located at /dynamic.yml which are then loaded immediately by traefik.
+Here we've set up both traefik and microw in a configuration so that Traefik will provide an https endpoint and authentication to microw's web interface, and microw can then write to traefik's dynamic config file located at /dynamic.yml which are then loaded by traefik.
 
 After running `docker-compose up -d` we can access the webgui at https://traefik-config.yoursite.com/?arg=/dynamic.yml.
 
@@ -190,15 +190,15 @@ services:
 networks:
   traefik-public:
 ```
-In this example we are setting up the same stack on docker with swarm mode. The only difference here are a few constraints causing traefik and microw to only run on a node which has traefik's configuration files. This can be added with `docker node update --label-add traefik-configs.traefik-dynamic=true yournode`.
+In this example we are setting up the same stack on docker with swarm mode. The only difference here are new deployment constraints causing traefik and microw to only run on a node which has traefik's configuration files. We can add this with `docker node update --label-add traefik-configs.traefik-dynamic=true yournode`.
 
 As before after running `docker stack deploy -c docker-compose-swarm.yml` we can access the webgui at https://traefik-config.yoursite.com/?arg=/dynamic.yml.
 
 ## Security considerations
-Due to the nature of the micro-editor and how it's implemented here by default, anyone who has access to the web interface should be considered as having **full access** to the underlying filesystem of the container; so be sure to **put proper safeguards in place** in front of it. e.g. an **authenticated reverse-proxy**, and allow **only trusted users**.
+Due to the nature of the micro-editor and how it's implemented here by default, anyone who has access to the web interface will have **full access** to the underlying filesystem of the container. Be sure to **put proper safeguards in place** in front of it. e.g. an **authenticated reverse-proxy**, and allow **trusted users only**.
 
 ## Reach out
-If have any issue with microw or the examples aforementioned please feel free to open an issue, or if you have anything you like to contribute to the project I would welcome a pull-request as well. And thank you form making it this far!
+If have any issue with microw or the examples above please feel free to open a new issue, or if you would like to contribute to the project I would welcome a pull-request as well. And thank you for making it this far!
 
 ## To Do
 - [ ] Flags to harden intra-container security (puid? chroot? login?)
