@@ -1,0 +1,64 @@
+---
+version: '3.8'
+services:
+  traefik:
+  # Docs: https://doc.traefik.io/traefik
+    image: traefik
+    container_name: traefik
+    command:
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.file=true
+      - --providers.file.filename=/dynamic.yml
+      - --entryPoints.web.address=:80
+      - --entryPoints.web.http.redirections.entryPoint.to=websecure
+      - --entryPoints.web.http.redirections.entryPoint.scheme=https
+      - --entryPoints.web.http.redirections.entryPoint.permanent=true
+      - --entryPoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls=true
+      - --entrypoints.websecure.http.tls.certresolver=le
+      - --certificatesresolvers.le.acme.email=youremail@yoursite.com
+      - --certificatesresolvers.le.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.le.acme.storage=/acme.json
+      - --certificatesresolvers.le.acme.dnschallenge=true
+      - --entrypoints.websecure.http.tls.domains[0].main=yoursite.com
+    environment:
+      - CLOUDFLARE_EMAIL=youremail@yoursite.com
+      - CF_DNS_API_TOKEN=token-given-by-cloudfalre
+    networks:
+      - traefik-public
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./acme.json:/acme.json
+      - ./.htpasswd:/.htpasswd
+      - ./traefik-dyamic-config.yml:/dynamic.yml
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik.rule=Host(`traefik.yoursite.com`)
+      - traefik.http.routers.traefik.service=api@internal
+      - traefik.http.routers.traefik.middlewares=user-auth
+      - traefik.http.middlewares.user-auth.basicauth.usersfile=/.htpasswd
+  microw:
+  # Docs: https://github.com/pyunramura/microw
+    image: ghcr.io/pyunramura/microw
+    container_name: microw
+    restart: unless-stopped
+    volumes:
+      - ./traefik-dynamic-config.yml:/dynamic.yml
+      - ./microw-config-dir:/config
+    networks:
+      - traefik-public
+    depends_on:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.routers.microw.rule=Host(`traefik-config.yoursite.com`)
+      - traefik.http.routers.traefik.service=microw
+      - traefik.services.microw.loadbalancer.port=7681
+      - traefik.http.routers.traefik.middlewares=user-auth
+networks:
+  traefik-public:
