@@ -2,14 +2,14 @@
 name: Validate Yaml
 # From: https://github.com/ibiqlik/action-yamllint
 
-on:    
+on:
   pull_request:
     paths:
       - '.github/**'
-  # push:
-  #   branches: [ main ]
-  #   paths:
-  #     - '.github/**'
+# push:
+#   branches: [ main ]
+#   paths:
+#     - '.github/**'
 
 jobs:
   validate:
