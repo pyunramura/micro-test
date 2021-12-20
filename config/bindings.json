@@ -1,0 +1,9 @@
+{
+    "Alt-/": "lua:comment.comment",
+    "CtrlUnderscore": "lua:comment.comment",
+    "F5": "lua:wc.wordCount",
+    "Alt-v": "command:vsplit",
+    "Alt-h": "command:hsplit",
+    "Alt-w": "NextSplit",
+    "Alt-t": "AddTab"
+}
