@@ -18,7 +18,7 @@ RUN [ ! -z ${TARGETPLATFORM+x} ] && \
         esac ; \
     apk add --no-cache \
         tini=0.19.0-r0 \
-        ttyd=1.6.3-r3 && \
+        ttyd=1.6.3-r2 && \
     mkdir /app && \
     wget -q -O - "https://github.com/zyedidia/micro/releases/download/v$micro/micro-$micro-linux${platform:-64-static}.tar.gz" | \
     tar xz --strip-components 1 micro-$micro/micro -C /app && \
