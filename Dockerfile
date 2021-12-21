@@ -1,6 +1,6 @@
 FROM alpine:3.15
 
-ARG micro=2.0.10
+ARG micro=
 ARG micro-plugin-list="detectindent manipulator quoter wc"
 
 ENV TINI_KILL_PROCESS_GROUP=1
