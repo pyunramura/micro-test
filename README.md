@@ -56,9 +56,9 @@ Now you can persist any changes you prefer in to micro's configuration settings,
 
 ### Advanced usage with docker using "cmd"
 ```
-docker run -p 7681:7681 --name microw ghcr.io/pyunramura/microw ttyd -s 3 --url-arg -t titleFixed=Microw -t rendererType=webgl /app/micro
+docker run -p 7681:7681 --name microw ghcr.io/pyunramura/microw -t titleFixed=Microw -t fontSize=18 micro
 ```
-Here the commands after `ghcr.io/pyunramura/microw` get passed to the tini init system, so if you'd prefer to log into the shell instead you could run `... ghcr.io/pyunramura/microw ttyd -s 3 ... /sbin/login`
+Here the commands after `ghcr.io/pyunramura/microw` get passed to the tini init system, so if you'd prefer to log into the shell instead you could run `... ghcr.io/pyunramura/microw /sbin/login`
 
 ***Note:*** More examples of **ttyd's** configuration options [are available here](https://github.com/tsl0922/ttyd#command-line-options).
 
@@ -69,7 +69,7 @@ Here the commands after `ghcr.io/pyunramura/microw` get passed to the tini init 
 version: '3.8'
 services:
   traefik:
-  # Docs: https://doc.traefik.io/traefik
+    # Docs: https://doc.traefik.io/traefik
     image: traefik
     container_name: traefik
     command:
@@ -103,7 +103,7 @@ services:
       - traefik.http.routers.traefik.middlewares=user-auth
       - traefik.http.middlewares.user-auth.basicauth.usersfile=/.htpasswd
   microw:
-  # Docs: https://github.com/pyunramura/microw
+    # Docs: https://github.com/pyunramura/microw
     image: ghcr.io/pyunramura/microw:latest
     container_name: microw
     restart: unless-stopped
@@ -131,7 +131,7 @@ After running `docker-compose up -d` we can access the webgui at https://traefik
 version: '3.8'
 services:
   traefik:
-  # Docs: https://doc.traefik.io/traefik
+    # Docs: https://doc.traefik.io/traefik
     image: traefik
     container_name: traefik
     command:
@@ -171,7 +171,7 @@ services:
         - traefik.http.routers.traefik.middlewares=user-auth
         - traefik.http.middlewares.user-auth.basicauth.usersfile=/.htpasswd
   microw:
-  # Docs: https://github.com/pyunramura/microw
+    # Docs: https://github.com/pyunramura/microw
     image: ghcr.io/pyunramura/microw:latest
     container_name: microw
     restart: unless-stopped
@@ -204,6 +204,8 @@ If have any issue with microw or the examples above please feel free to open a n
 - [ ] Flags to harden intra-container security (puid? chroot? login?)
 
 ## Updates
+- 1.1.0    Remove external deps. for Micro
+- 1.0.2    Fix build pipeline
 - 1.0.1    Updated README for container repos
 - 1.0.0    Stable release
 - 0.0.0    Init
