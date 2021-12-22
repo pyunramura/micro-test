@@ -2,7 +2,7 @@
 version: '3.8'
 services:
   traefik:
-  # Docs: https://doc.traefik.io/traefik
+    # Docs: https://doc.traefik.io/traefik
     image: traefik
     container_name: traefik
     command:
@@ -36,7 +36,7 @@ services:
       - traefik.http.routers.traefik.middlewares=user-auth
       - traefik.http.middlewares.user-auth.basicauth.usersfile=/.htpasswd
   microw:
-  # Docs: https://github.com/pyunramura/microw
+    # Docs: https://github.com/pyunramura/microw
     image: ghcr.io/pyunramura/microw:latest
     container_name: microw
     restart: unless-stopped
