@@ -1,6 +1,5 @@
 ---
 name: Dockerfile Update
-# From: https://github.com/rez0n/actions-github-release
 # From: https://github.com/ludeeus/dockerfile-updater
 on:
   workflow_dispatch:
@@ -14,14 +13,6 @@ jobs:
   update-dockerfile-deps:
     runs-on: ubuntu-20.04
     steps:
-      - name: Get latest release of Micro-Editor
-        uses: rez0n/actions-github-release@main
-        id: mciro_release
-        env:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "zyedidia/micro"
-          type: "latest"
-
       - uses: actions/checkout@v2.4.0
 
       - name: Update Dockerfile
@@ -29,4 +20,3 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           pr_title: "⚓ chore(deps): update dockerfile deps."
-          args: "micro=${{ steps.micro_release.outputs.release }}"
