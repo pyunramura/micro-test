@@ -17,7 +17,7 @@ env:
   EMAIL: ${{ github.repository_owner }}@users.noreply.github.com
   PLATFORM: linux/amd64,linux/arm64,linux/arm/v7,linux/386
 jobs:
-  semver:
+  semver-build-push-release:
     runs-on: ubuntu-20.04
     outputs:
       new_version: ${{ steps.bump-semver.outputs.new_version }}
@@ -51,26 +51,8 @@ jobs:
 
       - name: Check pr_Level and new_version
         run: |
-          echo pr_level is: ${{ needs.jobs.semver.outputs.pr_level }}
-          echo new_version is: ${{ needs.jobs.semver.outputs.new_version }}
           echo pr_level-descended is: ${{ steps.release-label.outputs.level }}
           echo new_version-descended is: ${{ steps.bump-semver.outputs.new_version }}
-
-  build-push:
-    needs: [semver]
-    runs-on: ubuntu-20.04
-    outputs:
-      tag_min: ${{ steps.maj-min-version.outputs.tag_min }}
-      date: ${{ steps.date.outputs.date }}
-    steps:
-      - name: Check pr_Level and new_version
-        run: |
-          echo pr_level is: ${{ needs.jobs.semver.outputs.pr_level }}
-          echo new_version is: ${{ needs.jobs.semver.outputs.new_version }}
-          echo pr_level-descended is: ${{ needs.jobs.semver.steps.release-label.outputs.level }}
-          echo new_version-descended is: ${{ needs.jobs.semver.steps.bump-semver.outputs.new_version }}
-
-      - uses: actions/checkout@v2.4.0
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -96,8 +78,8 @@ jobs:
         id: maj-min-version
         shell: bash
         run: |
-          TAG_MAJ=$(echo ${{ needs.jobs.semver.outputs.new_version }} | cut -f 1 -d '.')
-          TAG_MIN=$(echo ${{ needs.jobs.semver.outputs.new_version }} | cut -f 1,2 -d '.')
+          TAG_MAJ=$(echo ${{ steps.bump-semver.outputs.new_version }} | cut -f 1 -d '.')
+          TAG_MIN=$(echo ${{ steps.bump-semver.outputs.new_version }} | cut -f 1,2 -d '.')
           echo "::set-output name=tag_maj::$TAG_MAJ"
           echo "::set-output name=tag_min::$TAG_MIN"
 
@@ -107,7 +89,7 @@ jobs:
 
       - name: Build and push multiarch
         uses: docker/build-push-action@v2
-        if: ${{ needs.jobs.semver.outputs.new_version }}
+        if: ${{ steps.bump-semver.outputs.new_version }}
         with:
           context: .
           platforms: ${{ env.PLATFORM }}
@@ -117,92 +99,80 @@ jobs:
             org.label-schema.description = ${{ github.event.repository.description }}
             org.label-schema.build-date=${{ steps.date.outputs.date }}
             org.label-schema.vendor = ${{ env.USER }} <${{ env.EMAIL }}>
-            org.label-schema.version = ${{ needs.release.outputs.new_version }}
+            org.label-schema.version = ${{ steps.bump-semver.outputs.new_version }}
             org.label-schema.vcs-ref = ${{ github.sha }}
             org.label-schema.vcs-url = https://github.com/${{ github.repository }}
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP }}:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP }}:${{ needs.release.outputs.new_version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP }}:${{ steps.bump-semver.outputs.new_version }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP }}:${{ steps.maj-min-version.outputs.tag_maj }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP }}:${{ steps.maj-min-version.outputs.tag_min }}
             ghcr.io/${{ github.repository_owner }}/${{ env.APP }}:latest
-            ghcr.io/${{ github.repository_owner }}/${{ env.APP }}:${{ needs.release.outputs.new_version }}
+            ghcr.io/${{ github.repository_owner }}/${{ env.APP }}:${{ steps.bump-semver.outputs.new_version }}
             ghcr.io/${{ github.repository_owner }}/${{ env.APP }}:${{ steps.maj-min-version.outputs.tag_maj }}
             ghcr.io/${{ github.repository_owner }}/${{ env.APP }}:${{ steps.maj-min-version.outputs.tag_min }}
 
-  build-artifact:
-    needs: [semver, build-push]
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2.4.0
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
       - name: Build amd64
         uses: docker/build-push-action@v2
-        if: ${{ needs.jobs.semver.outputs.new_version }}
+        if: ${{ steps.bump-semver.outputs.new_version }}
         with:
           context: .
           platforms: linux/amd64
-          outputs: type=docker,dest=/tmp/${{ env.APP }}-amd64-${{ needs.jobs.build-push.outputs.tag_min }}-image.tar
+          outputs: type=docker,dest=/tmp/${{ env.APP }}-amd64-${{ steps.maj-min-version.outputs.tag_min }}-image.tar
           labels: |
             org.label-schema.name = ${{ env.APP }}
             org.label-schema.description = ${{ github.event.repository.description }}
-            org.label-schema.build-date=${{ needs.jobs.build-push.outputs.date }}
+            org.label-schema.build-date=${{ steps.date.outputs.date }}
             org.label-schema.vendor = ${{ env.USER }} <${{ env.EMAIL }}>
-            org.label-schema.version = ${{ needs.jobs.semver.outputs.new_version }}
+            org.label-schema.version = ${{ steps.bump-semver.outputs.new_version }}
             org.label-schema.vcs-ref = ${{ github.sha }}
             org.label-schema.vcs-url = https://github.com/${{ github.repository }}
 
       - name: Build arm64
         uses: docker/build-push-action@v2
-        if: ${{ needs.jobs.semver.outputs.new_version }}
+        if: ${{ steps.bump-semver.outputs.new_version }}
         with:
           context: .
           platforms: linux/arm64
-          outputs: type=docker,dest=/tmp/${{ env.APP }}-arm64-${{ needs.jobs.build-push.outputs.tag_min }}-image.tar
+          outputs: type=docker,dest=/tmp/${{ env.APP }}-arm64-${{ steps.maj-min-version.outputs.tag_min }}-image.tar
           labels: |
             org.label-schema.name = ${{ env.APP }}
             org.label-schema.description = ${{ github.event.repository.description }}
-            org.label-schema.build-date=${{ needs.jobs.build-push.outputs.date }}
+            org.label-schema.build-date=${{ steps.date.outputs.date }}
             org.label-schema.vendor = ${{ env.USER }} <${{ env.EMAIL }}>
-            org.label-schema.version = ${{ needs.jobs.semver.outputs.new_version }}
+            org.label-schema.version = ${{ steps.bump-semver.outputs.new_version }}
             org.label-schema.vcs-ref = ${{ github.sha }}
             org.label-schema.vcs-url = https://github.com/${{ github.repository }}
 
       - name: Build armv7
         uses: docker/build-push-action@v2
-        if: ${{ needs.jobs.semver.outputs.new_version }}
+        if: ${{ steps.bump-semver.outputs.new_version }}
         with:
           context: .
           platforms: linux/arm/v7
-          outputs: type=docker,dest=/tmp/${{ env.APP }}-armv7-${{ needs.jobs.build-push.outputs.tag_min }}-image.tar
+          outputs: type=docker,dest=/tmp/${{ env.APP }}-armv7-${{ steps.maj-min-version.outputs.tag_min }}-image.tar
           labels: |
             org.label-schema.name = ${{ env.APP }}
             org.label-schema.description = ${{ github.event.repository.description }}
-            org.label-schema.build-date=${{ needs.jobs.build-push.outputs.date }}
+            org.label-schema.build-date=${{ steps.date.outputs.date }}
             org.label-schema.vendor = ${{ env.USER }} <${{ env.EMAIL }}>
-            org.label-schema.version = ${{ needs.jobs.semver.outputs.new_version }}
+            org.label-schema.version = ${{ steps.bump-semver.outputs.new_version }}
             org.label-schema.vcs-ref = ${{ github.sha }}
             org.label-schema.vcs-url = https://github.com/${{ github.repository }}
 
       - name: Build i386
         uses: docker/build-push-action@v2
-        if: ${{ needs.jobs.semver.outputs.new_version }}
+        if: ${{ steps.bump-semver.outputs.new_version }}
         with:
           context: .
           platforms: linux/386
-          outputs: type=docker,dest=/tmp/${{ env.APP }}-i386-${{ needs.jobs.build-push.outputs.tag_min }}-image.tar
+          outputs: type=docker,dest=/tmp/${{ env.APP }}-i386-${{ steps.maj-min-version.outputs.tag_min }}-image.tar
           labels: |
             org.label-schema.name = ${{ env.APP }}
             org.label-schema.description = ${{ github.event.repository.description }}
-            org.label-schema.build-date=${{ needs.jobs.build-push.outputs.date }}
+            org.label-schema.build-date=${{ steps.date.outputs.date }}
             org.label-schema.vendor = ${{ env.USER }} <${{ env.EMAIL }}>
-            org.label-schema.version = ${{ needs.jobs.semver.outputs.new_version }}
+            org.label-schema.version = ${{ steps.bump-semver.outputs.new_version }}
             org.label-schema.vcs-ref = ${{ github.sha }}
             org.label-schema.vcs-url = https://github.com/${{ github.repository }}
 
@@ -221,36 +191,24 @@ jobs:
           path: /tmp/${{ env.APP }}*.tar.gz
           if-no-files-found: error
 
-  create-release:
-    needs: [build-artifact]
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2.4.0
-
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: ${{ env.APP }}-docker-images
-          path: /tmp
-
       - uses: actions-ecosystem/action-regex-match@v2
         id: regex-match
-        if: ${{ needs.jobs.semver.outputs.new_version }}
+        if: ${{ steps.bump-semver.outputs.new_version }}
         with:
-          text: ${{ needs.jobs.semver.steps.get-merged-pull-request.outputs.body }}
+          text: ${{ steps.get-merged-pull-request.outputs.body }}
           regex: '```release_note([\s\S]*)```'
 
       - uses: actions-ecosystem/action-push-tag@v1
-        if: ${{ needs.jobs.semver.outputs.new_version }}
+        if: ${{ steps.bump-semver.outputs.new_version }}
         with:
-          tag: ${{ needs.jobs.semver.steps.bump-semver.outputs.new_version }}
-          message: "${{ needs.jobs.semver.steps.bump-semver.outputs.new_version }}: PR #${{ needs.jobs.semver.steps.get-merged-pull-request.outputs.number }} ${{ needs.jobs.semver.steps.get-merged-pull-request.outputs.title }}"
+          tag: ${{ steps.bump-semver.outputs.new_version }}
+          message: "${{ steps.bump-semver.outputs.new_version }}: PR #${{ steps.get-merged-pull-request.outputs.number }} ${{ steps.get-merged-pull-request.outputs.title }}"
 
       - uses: softprops/action-gh-release@v1
-        if: ${{ needs.jobs.semver.outputs.pr_level == 'major' || needs.jobs.semver.outputs.pr_level == 'minor' }}
+        if: ${{ steps.release-label.outputs.level == 'major' || steps.release-label.outputs.level == 'minor' }}
         with:
-          tag_name: ${{ needs.jobs.semver.outputs.new_version }}
-          name: ${{ needs.jobs.semver.outputs.new_version }}
+          tag_name: ${{ steps.bump-semver.outputs.new_version }}
+          name: ${{ steps.bump-semver.outputs.new_version }}
           # token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.regex-match.outputs.group1 }}
           # body_path: ${{ github.workspace }}-CHANGELOG.txt
@@ -259,9 +217,9 @@ jobs:
             /tmp/${{ env.APP }}*.tar.gz
 
       - uses: actions-ecosystem/action-create-comment@v1
-        if: ${{ needs.jobs.semver.outputs.new_version != null }}
+        if: ${{ steps.bump-semver.outputs.new_version != null }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ needs.jobs.semver.steps.get-merged-pull-request.outputs.number }}
+          number: ${{ steps.get-merged-pull-request.outputs.number }}
           body: |
-            The new version [${{ needs.jobs.semver.outputs.new_version }}](https://github.com/${{ github.repository }}/releases/tag/${{ needs.jobs.semver.outputs.new_version }}) has been released :tada:
+            The new version [${{ steps.bump-semver.outputs.new_version }}](https://github.com/${{ github.repository }}/releases/tag/${{ steps.bump-semver.outputs.new_version }}) has been released :tada:
