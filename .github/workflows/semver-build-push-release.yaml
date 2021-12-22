@@ -78,7 +78,7 @@ jobs:
           password: ${{ secrets.CR_PAT }}
 
       - name: Extract major and minor version from semver
-    # Snippet from: https://github.com/actions/toolkit/blob/master/docs/commands.md#set-an-environment-variable
+        # Snippet from: https://github.com/actions/toolkit/blob/master/docs/commands.md#set-an-environment-variable
         id: maj-min-version
         shell: bash
         run: |
