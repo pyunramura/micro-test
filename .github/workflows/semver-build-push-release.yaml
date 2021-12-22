@@ -49,6 +49,13 @@ jobs:
           current_version: ${{ steps.get-latest-tag.outputs.tag }}
           level: ${{ steps.release-label.outputs.level }}
 
+      - name: Check pr_Level and new_version
+        run: |
+          echo pr_level is: ${{ needs.jobs.semver.outputs.pr_level }}
+          echo new_version is: ${{ needs.jobs.semver.outputs.new_version }}
+          echo pr_level-descended is: ${{ steps.release-label.outputs.level }}
+          echo new_version-descended is: ${{ steps.bump-semver.outputs.new_version }}
+
   build-push:
     needs: [semver]
     runs-on: ubuntu-20.04
@@ -56,6 +63,13 @@ jobs:
       tag_min: ${{ steps.maj-min-version.outputs.tag_min }}
       date: ${{ steps.date.outputs.date }}
     steps:
+      - name: Check pr_Level and new_version
+        run: |
+          echo pr_level is: ${{ needs.jobs.semver.outputs.pr_level }}
+          echo new_version is: ${{ needs.jobs.semver.outputs.new_version }}
+          echo pr_level-descended is: ${{ needs.jobs.semver.steps.release-label.outputs.level }}
+          echo new_version-descended is: ${{ needs.jobs.semver.steps.bump-semver.outputs.new_version }}
+
       - uses: actions/checkout@v2.4.0
 
       - name: Set up QEMU
@@ -229,8 +243,8 @@ jobs:
       - uses: actions-ecosystem/action-push-tag@v1
         if: ${{ needs.jobs.semver.outputs.new_version }}
         with:
-          tag: ${{ needs.jobs.semver.outputs.new_version }}
-          message: "${{ needs.jobs.semver.outputs.new_version }}: PR #${{ needs.jobs.semver.steps.get-merged-pull-request.outputs.number }} ${{ needs.jobs.semver.steps.get-merged-pull-request.outputs.title }}"
+          tag: ${{ needs.jobs.semver.steps.bump-semver.outputs.new_version }}
+          message: "${{ needs.jobs.semver.steps.bump-semver.outputs.new_version }}: PR #${{ needs.jobs.semver.steps.get-merged-pull-request.outputs.number }} ${{ needs.jobs.semver.steps.get-merged-pull-request.outputs.title }}"
 
       - uses: softprops/action-gh-release@v1
         if: ${{ needs.jobs.semver.outputs.pr_level == 'major' || needs.jobs.semver.outputs.pr_level == 'minor' }}
