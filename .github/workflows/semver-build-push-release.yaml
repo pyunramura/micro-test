@@ -229,8 +229,8 @@ jobs:
       - uses: actions-ecosystem/action-push-tag@v1
         if: ${{ needs.jobs.semver.outputs.new_version != null }}
         with:
-          tag: ${{ jobs.semver.outputs.new_version }}
-          message: "${{ jobs.semver.outputs.new_version }}: PR #${{ needs.jobs.semver.steps.get-merged-pull-request.outputs.number }} ${{ needs.jobs.semver.steps.get-merged-pull-request.outputs.title }}"
+          tag: ${{ needs.jobs.semver.outputs.new_version }}
+          message: "${{ needs.jobs.semver.outputs.new_version }}: PR #${{ needs.jobs.semver.steps.get-merged-pull-request.outputs.number }} ${{ needs.jobs.semver.steps.get-merged-pull-request.outputs.title }}"
 
       - uses: softprops/action-gh-release@v1
         if: ${{ needs.jobs.semver.outputs.pr_level == 'major' || needs.jobs.semver.outputs.pr_level == 'minor' }}
@@ -250,4 +250,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           number: ${{ needs.jobs.semver.steps.get-merged-pull-request.outputs.number }}
           body: |
-            The new version [${{ jobs.semver.outputs.new_version }}](https://github.com/${{ github.repository }}/releases/tag/${{ jobs.semver.outputs.new_version }}) has been released :tada:
+            The new version [${{ needs.jobs.semver.outputs.new_version }}](https://github.com/${{ github.repository }}/releases/tag/${{ needs.jobs.semver.outputs.new_version }}) has been released :tada:
