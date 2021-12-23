@@ -1,7 +1,7 @@
 # [pyunramura/microw](https://github.com/pyunramura/microw)
 ***The w stands for web!***
 
-[![Release Ship](https://github.com/pyunramura/micro-test/actions/workflows/release-ship.yaml/badge.svg)](https://github.com/pyunramura/micro-test/actions/workflows/release-ship.yaml) [![Validate Dockerfile](https://github.com/pyunramura/micro-test/actions/workflows/validate-dockerfile.yaml/badge.svg)](https://github.com/pyunramura/micro-test/actions/workflows/validate-dockerfile.yaml)
+[![Release Ship](https://github.com/pyunramura/microw/actions/workflows/semver-build-push-release.yaml/badge.svg)](https://github.com/pyunramura/microw/actions/workflows/semver-build-push-release.yaml) [![Validate Dockerfile](https://github.com/pyunramura/micro-test/actions/workflows/validate-dockerfile.yaml/badge.svg)](https://github.com/pyunramura/micro-test/actions/workflows/validate-dockerfile.yaml)
 ---
 
 This project's home is located at https://github.com/pyunramura/microw
