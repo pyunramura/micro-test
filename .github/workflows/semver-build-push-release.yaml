@@ -70,8 +70,8 @@ jobs:
         uses: docker/login-action@v2.0.0
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.CR_PAT }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract major and minor version from semver
         # Snippet from: https://github.com/actions/toolkit/blob/master/docs/commands.md#set-an-environment-variable
