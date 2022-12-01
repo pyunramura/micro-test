@@ -9,7 +9,7 @@ EXPOSE 7681
 
 RUN apk add --no-cache \
         tini=0.19.0-r1 \
-        ttyd=1.6.3-r3 \
+        ttyd=1.7.2-r0 \
         micro=2.0.10-r5 && \
     micro -plugin install $micro_plugin_list; \
     micro -plugin update
