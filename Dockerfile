@@ -8,7 +8,7 @@ ENV MICRO_CONFIG_HOME=/config
 EXPOSE 7681
 
 RUN apk add --no-cache \
-        tini=0.19.0-r0 \
+        tini=0.19.0-r1 \
         ttyd=1.6.3-r3 \
         micro=2.0.10-r5 && \
     micro -plugin install $micro_plugin_list; \
