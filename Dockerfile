@@ -12,9 +12,12 @@ RUN apk add --no-cache \
         ttyd=1.7.2-r0 \
         micro=2.0.11-r6 && \
     micro -plugin install $micro_plugin_list; \
-    micro -plugin update
+    micro -plugin update; \
+    mkdir /data
 
 COPY config config/
+
+WORKDIR /data
 
 ENTRYPOINT ["/sbin/tini", "--", "ttyd", "-s", "3", "--url-arg", "-t", "rendererType=webgl", "-t", "disableLeaveAlert=true", "-t", "disableResizeOverlay=true", "-t", "disableReconnect=true"]
 
