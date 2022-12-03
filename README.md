@@ -6,7 +6,7 @@
 
 This project's home is located at https://github.com/pyunramura/microw
 
-Find this image on the Github container registry at [pyunramura/microw](https://github.com/users/pyunramura/packages/container/package/microw) 
+Find this image on the Github container registry at [pyunramura/microw](https://github.com/users/pyunramura/packages/container/package/microw)
 
 or in the Dockerhub registry at [ghcr.io/pyunramura/microw](https://hub.docker.com/r/pyunramura/microw).
 
@@ -38,13 +38,13 @@ Then access the newly created Micro buffer at http://localhost:7681/
 
 ### Using a docker volume mapping to edit a local config file
 ```
-docker run -p 7681:7681 -v local-dir/example-file.conf:/container-dir/example-file.conf --name microw ghcr.io/pyunramura/microw
+docker run -p 7681:7681 -v local-dir/example-file.conf:/data/example-file.conf --name microw ghcr.io/pyunramura/microw
 ```
-Then access the file in the webgui at http://localhost:7681/?arg=/container-dir/example-file.conf
+Then access the file in the webgui at http://localhost:7681/?arg=/data/example-file.conf
 
 Where `?arg=` is the argument you want passed on to Micro. You can also string arguments with an `&` between each one.
 
-e.x. `?arg=/container-dir/example-file.conf&arg=/another-dir/another-file.conf`
+e.x. `?arg=/data/example-file.conf&arg=/data/another-file.conf`
 
 ***Note:*** More examples of **Micro's** configuration options [are available here](https://github.com/zyedidia/micro/tree/master/runtime/help).
 
@@ -108,7 +108,7 @@ services:
     container_name: microw
     restart: unless-stopped
     volumes:
-      - ./dynamic-config.yml:/dynamic.yml
+      - ./dynamic-config.yml:/data/dynamic.yml
     networks:
       - traefik-public
     depends_on:
@@ -122,7 +122,7 @@ networks:
 ```
 Here we've set up both traefik and microw in a configuration so that Traefik will provide an https endpoint and authentication to microw's web interface, and microw can then write to traefik's dynamic config file located at /dynamic.yml which are then loaded by traefik.
 
-After running `docker-compose up -d` we can access the webgui at https://traefik-config.yoursite.com/?arg=/dynamic.yml.
+After running `docker-compose up -d` we can access the webgui at https://traefik-config.yoursite.com/?arg=/data/dynamic.yml.
 
 ### Example usage with docker swarm and traefik
 [/docker-compose-swarm.yml](docker-compose-swarm.yml)
@@ -176,7 +176,7 @@ services:
     container_name: microw
     restart: unless-stopped
     volumes:
-      - ./dynamic-config.yml:/dynamic.yml
+      - ./dynamic-config.yml:/data/dynamic.yml
     networks:
       - traefik-public
     deploy:
@@ -192,7 +192,7 @@ networks:
 ```
 In this example we are setting up the same stack on docker with swarm mode. The only difference here are new deployment constraints causing traefik and microw to only run on a node which has traefik's configuration files. We can add this with `docker node update --label-add traefik-configs.traefik-dynamic=true yournode`.
 
-As before after running `docker stack deploy -c docker-compose-swarm.yml` we can access the webgui at https://traefik-config.yoursite.com/?arg=/dynamic.yml.
+As before after running `docker stack deploy -c docker-compose-swarm.yml` we can access the webgui at https://traefik-config.yoursite.com/?arg=/data/dynamic.yml.
 
 ## Security considerations
 Due to the nature of the micro-editor and how it's implemented here by default, anyone who has access to the web interface will have **full access** to the underlying filesystem of the container. Be sure to **put proper safeguards in place** in front of it. e.g. an **authenticated reverse-proxy**, and allow **trusted users only**.
@@ -204,6 +204,8 @@ If have any issue with microw or the examples above please feel free to open a n
 - [ ] Flags to harden intra-container security (puid? chroot? login?)
 
 ## Updates
+- 1.3.0    Update WORKDIR, package versions, and Alpine base image
+- 1.2.0    Update CI tooling and package versions
 - 1.1.0    Remove external deps. for Micro
 - 1.0.2    Fix build pipeline
 - 1.0.1    Updated README for container repos
